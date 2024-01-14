@@ -169,11 +169,10 @@ class HBNBCommand(cmd.Cmd):
         }
         
         if method_name in method_dict.keys():
-            return method_dict[method_name]("{}.{}".format(cls_name, ''))
-
-        print("*** Unknown syntax: {}".format(arg))
-        return False
-
+            return method_dict[method_name](" {} {}".format(cls_name, ""))
+        else:
+            print("*** Unknown syntax: {}".format(arg))
+            return False
 
 
 

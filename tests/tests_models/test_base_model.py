@@ -188,6 +188,7 @@ class TestBaseModel_to_dict(unittest.TestCase):
         with self.assertRaises(TypeError):
             bm.to_dict(None)
 
+
 class TestBaseModel_str(unittest.TestCase):
     """ Unittests for testing str method of the BaseModel class."""
 
@@ -196,6 +197,7 @@ class TestBaseModel_str(unittest.TestCase):
         self.assertTrue(str(bm).startswith('[BaseModel]'))
         self.assertIn(bm.id, str(bm))
         self.assertIn(str(bm.__dict__), str(bm))
+
 
 if __name__ == "__main__":
     unittest.main()

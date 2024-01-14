@@ -155,7 +155,7 @@ class HBNBCommand(cmd.Cmd):
                 setattr(obj, attr_name, attr_value)
                 obj.save()
 
-    def deafult(self, arg):
+    def default(self, arg):
         """Reprogram default behavior for cmd module when input is invalid."""
         arg_list = arg.split('.')
         cls_name = arg_list[0]

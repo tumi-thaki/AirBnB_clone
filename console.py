@@ -36,14 +36,21 @@ def split_curly_braces(extra_args):
         return id, arg_dict
     else:
         commands = extra_args.split(",")
-        try:
-            id = commands[0]
-            attr_name = commands[1]
-            attr_value = commands[2]
+        if commands:
+            try:
+                id = commands[0]
+            except Exception:
+                return "", ""
+            try:
+                attr_name = commands[1]
+            except Exception:
+                return id, ""
+            try:
+                attr_value = commands[2]
+            except Exception:
+                return id, attr_name
 
             return f"{id}", f"{attr_name} {attr_value}"
-        except Exception:
-            print("** instance id missing **")
 
 
 class HBNBCommand(cmd.Cmd):
@@ -232,20 +239,19 @@ class HBNBCommand(cmd.Cmd):
                 return method_dict[method_name](" {} {}".format
                                                 (cls_name, extra_arg))
             else:
-                id, arg_dict = split_curly_braces(extra_arg)
+                if not cls_name:
+                    print("** class name missing **")
+                    return
                 try:
-                    if isinstance(arg_dict, str):
-                        attributes = arg_dict
-                        return method_dict[method_name](" {} {} {}".format
-                                                        (cls_name, obj_id,
-                                                            atrributes))
-                    elif isinstance(arg_dict, dict):
-                        dict_attributes = arg_dict
-                        return method_dict[method_name](" {} {} {}".format
-                                                        (cls_name, obj_id,
-                                                            dict_atrributes))
+                    obj_id, arg_dict = split_curly_braces(extra_arg)
                 except Exception:
-                    print("** instance id missing **")
+                    pass
+                try:
+                    return method_dict[method_name](" {} {} {}".format
+                                                    (cls_name, obj_id,
+                                                        arg_dict))
+                except Exception:
+                    pass
         else:
             print("*** Unknown syntax: {}".format(arg))
             return False

@@ -161,6 +161,7 @@ class HBNBCommand(cmd.Cmd):
         cls_name = arg_list[0]
         command = arg_list[1].split('(')
         method_name = command[0]
+        idsearch = command[1].split(')')[0]
         method_dict = {
                 'all': self.do_all,
                 'show': self.do_show,
@@ -170,7 +171,7 @@ class HBNBCommand(cmd.Cmd):
         }
         
         if method_name in method_dict.keys():
-            return method_dict[method_name](" {} {}".format(cls_name, ""))
+            return method_dict[method_name](" {} {}".format(cls_name, idsearch))
         else:
             print("*** Unknown syntax: {}".format(arg))
             return False

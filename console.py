@@ -3,6 +3,8 @@
 
 import cmd
 import shlex
+import re
+import ast
 from models.base_model import BaseModel
 from models import storage
 from models.user import User
@@ -12,6 +14,38 @@ from models.city import City
 from models.amenity import Amenity
 from models.review import Review
 
+
+def split_curly_braces(extra_args):
+    """Splits the curly barces for the update method.
+            extra_args = '"12345", "first_name", "John"'
+                            OR
+            extra_args = '"12345", {"first_name": "John", "age": 89}'
+    """
+
+    curly_braces = re.search(r"\{(.*?)\}", extra_args)
+
+    if curly_braces:
+        id_comma = shlex.split(extra_args[:curly_braces.span()[0]])
+        id = [i.strip(",") for i in id_comma][0]
+        str_data = curly_braces.group(1)
+        try:
+            arg_dict = ast.literal_eval("(" + str_data + ")")
+        except Exception:
+            print("**Invalid dictioary format **")
+            return
+        return id, arg_dict
+    else:
+        commands = extra_args.split(",")
+        try:
+            id = commands[0]
+            attr_name = commands[1]
+            attr_value = commands[2]
+
+            return f"{id}", f"{attr_name} {attr_value}"
+        except Exception:
+            print("** instance id missing **")
+
+
 class HBNBCommand(cmd.Cmd):
     """Defines the AirBnB command interpreter.
 
@@ -20,21 +54,27 @@ class HBNBCommand(cmd.Cmd):
     """
 
     prompt = "(hbnb) "
-    valid_classes = ["BaseModel", "User", "Place", "State", "City", "Amenity", "Review"]
+    valid_classes = ["BaseModel", "User", "Place", "State",
+                     "City", "Amenity", "Review"]
 
     def empty_line(self):
         """Do nothing when receiving an empty line."""
+
         pass
+
     def do_quit(self, arg):
         """Quit command to exit program."""
+
         return True
 
     def help_quit(self, arg):
         """Defines the action of the quit command """
+
         print("Quit command to exit program")
 
     def do_EOF(self, arg):
         """EOF signal for exiting the program."""
+
         print()
         return True
 
@@ -77,7 +117,7 @@ class HBNBCommand(cmd.Cmd):
 
     def do_destroy(self, arg):
         """
-         Deletes an instance based on the class name and id 
+         Deletes an instance based on the class name and id
             then saves the change into the JSON file.
                 Usage: destroy <class> <id>
         """
@@ -120,7 +160,7 @@ class HBNBCommand(cmd.Cmd):
         """
         Updates an instance based on the class name and id.
         Adds or updates attribute and saves change to JSON file.
-            Usage: update <class name> <id> <attribute name> "<attribute value>"
+            Usage: update <class name> <id> <attribute name> <attribute value>
         """
 
         commands = shlex.split(arg)
@@ -144,15 +184,31 @@ class HBNBCommand(cmd.Cmd):
                 print("** value missing **")
             else:
                 obj = objects[key]
-                attr_name = commands[2]
-                attr_value = commands[3]
+                curly_braces = re.search(r"\{(.*?)\}", arg)
 
-                try:
-                    attr_value = eval(attr_value)
-                except Exception:
-                    pass
+                if curly_braces:
+                    str_data = curly_braces.group(1)
+                    arg_dict = ast.literal_eval("{" + str_data + "}")
+                    attribute_names = list(arg_dict.keys())
+                    attribute_values = list(arg_dict.values())
+                    attr_name1 = attribute_names[0]
+                    attr_value1 = attribute_values[0]
 
-                setattr(obj, attr_name, attr_value)
+                    attr_name2 = attribute_names[1]
+                    attr_value2 = attribute_values[1]
+
+                    setattr(obj, attr_name1, attr_value1)
+                    setattr(obj, attr_name2, attr_value2)
+                else:
+                    attr_name = commands[2]
+                    attr_value = commands[3]
+
+                    try:
+                        attr_value = eval(attr_value)
+                    except Exception:
+                        pass
+
+                    setattr(obj, attr_name, attr_value)
                 obj.save()
 
     def default(self, arg):
@@ -162,7 +218,7 @@ class HBNBCommand(cmd.Cmd):
         command = arg_list[1].split('(')
         method_name = command[0]
         extra_arg = command[1].split(')')[0]
-        all_args = extra_arg.split(',')
+
         method_dict = {
                 'all': self.do_all,
                 'show': self.do_show,
@@ -170,12 +226,26 @@ class HBNBCommand(cmd.Cmd):
                 'update': self.do_update,
                 'count': self.do_count
         }
-        
+
         if method_name in method_dict.keys():
             if method_name != 'update':
-                return method_dict[method_name](" {} {}".format(cls_name, extra_arg))
+                return method_dict[method_name](" {} {}".format
+                                                (cls_name, extra_arg))
             else:
-                return method_dict[method_name](" {} {} {} {}".format(cls_name, all_args[0], all_args[1], all_args[2]))
+                id, arg_dict = split_curly_braces(extra_arg)
+                try:
+                    if isinstance(arg_dict, str):
+                        attributes = arg_dict
+                        return method_dict[method_name](" {} {} {}".format
+                                                        (cls_name, obj_id,
+                                                            atrributes))
+                    elif isinstance(arg_dict, dict):
+                        dict_attributes = arg_dict
+                        return method_dict[method_name](" {} {} {}".format
+                                                        (cls_name, obj_id,
+                                                            dict_atrributes))
+                except Exception:
+                    print("** instance id missing **")
         else:
             print("*** Unknown syntax: {}".format(arg))
             return False
@@ -197,8 +267,6 @@ class HBNBCommand(cmd.Cmd):
                 if obj.__class__.__name__ == commands[0]:
                     count += 1
             print(count)
-
-
 
 
 if __name__ == "__main__":

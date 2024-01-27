@@ -57,9 +57,8 @@ div.amenities:hover .popover{
 	display: block;
 }
 
-ul.popover {
+.popover {
 	display: none;
-	width: 100%;
 	background-color: #FAFAFA;
 	border: 1px solid #DDDDDD;
 	border-radius: 4px;
@@ -71,13 +70,13 @@ ul.popover {
 h2 {
 	font-size: 16px;
 	text-align: left;
-	margin: 15px 0px 0px 0px;
+	margin: 15px 0px 0px -25px;
 }
 
 li {
 	text-align: left;
 	list-style-type: none;
-	margin: 0px 0px 0px 20px;
+	margin: 0px 0px 0px -10px;
 }
 
 ul {
